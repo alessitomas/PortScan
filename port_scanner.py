@@ -2,7 +2,6 @@ import streamlit as st
 import socket
 import ipaddress
 
-
 well_known_ports = {
     20: "FTP-DATA", 21: "FTP", 22: "SSH", 23: "Telnet", 25: "SMTP",
     53: "DNS", 80: "HTTP", 110: "POP3", 143: "IMAP", 443: "HTTPS",
@@ -27,11 +26,16 @@ def scan_range(ip, start_port, end_port):
             open_ports.append((port, service))
     return open_ports
 
+def is_valid_ip_or_network(address):
+    try:
+        ipaddress.ip_network(address, strict=False)
+        return True
+    except ValueError:
+        return False
+
 st.title("Escaneador de Portas")
 
-
 target = st.text_input("Digite o host ou rede a ser escaneado:")
-
 
 col1, col2 = st.columns(2)
 with col1:
@@ -41,10 +45,8 @@ with col2:
 
 if st.button("Escanear"):
     if target and start_port <= end_port:
-        try:
-            
+        if is_valid_ip_or_network(target):
             network = ipaddress.ip_network(target, strict=False)
-            
             for ip in network.hosts():
                 st.subheader(f"Resultados para {ip}:")
                 open_ports = scan_range(str(ip), start_port, end_port)
@@ -56,8 +58,18 @@ if st.button("Escanear"):
                     st.write("Nenhuma porta aberta encontrada.")
                 
                 st.write("---")
-        
-        except ValueError:
-            st.error("Endereço IP ou rede inválido.")
+        else:
+            try:
+                ip = socket.gethostbyname(target)
+                st.subheader(f"Resultados para {target} ({ip}):")
+                open_ports = scan_range(ip, start_port, end_port)
+                
+                if open_ports:
+                    for port, service in open_ports:
+                        st.write(f"Porta {port}: {service}")
+                else:
+                    st.write("Nenhuma porta aberta encontrada.")
+            except socket.gaierror:
+                st.error("Nome de host inválido ou não resolvível.")
     else:
-        st.error("Por favor, preencha todos os campos corretamente.") 
+        st.error("Por favor, preencha todos os campos corretamente.")
