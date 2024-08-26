@@ -31,4 +31,4 @@ Este é um projeto simples de escaneamento de portas utilizando `Streamlit`. O o
 
 ## Exemplo 
 
-![alt text](https://file%2B.vscode-resource.vscode-cdn.net/Users/alessi/Workspace/insper/cyber-sec/PortScan/Screenshot%202024-08-26%20at%2009.50.55.png?version%3D1724676889441)
+![Alt Text](./example.png)
